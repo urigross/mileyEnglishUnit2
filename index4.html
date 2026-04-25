@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Jet 2 - Focus Practice (Fixed v2)</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #fff9e6; text-align: center; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); border: 3px solid #ffcc00; }
+        .word-display { font-size: 45px; font-weight: bold; letter-spacing: 2px; color: #2e4053; margin: 15px 0; text-transform: uppercase; }
+        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        button { padding: 15px; font-size: 18px; cursor: pointer; border: 2px solid #e67e22; border-radius: 12px; background: white; transition: 0.2s; font-weight: bold; }
+        button:hover { background: #fdf2e9; }
+        .correct-anim { background-color: #27ae60 !important; color: white; }
+        #feedback { height: 30px; font-weight: bold; margin: 10px; font-size: 22px; }
+        textarea { width: 100%; height: 50px; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 style="color:#d35400;">אימון ממוקד - גרסה סופית</h1>
+    <div id="game-content">
+        <div style="background: #fdf2e9; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+            <div id="instruction" style="font-size:20px; color:#7f8c8d;"></div>
+            <div id="word-display" class="word-display"></div>
+        </div>
+        <div class="options" id="options-container"></div>
+        <div id="feedback"></div>
+    </div>
+    
+    <div style="margin-top:20px; color:#95a5a6;">שאלה <span id="q-num">1</span> מתוך 10</div>
+    <button id="log-btn" style="display:none; background:#27ae60; color:white; width:100%; padding:10px; border-radius:10px; border:none; cursor:pointer;" onclick="exportResults()">לחצו כאן להפקת דוח סיכום</button>
+    <textarea id="log-out" readonly></textarea>
+</div>
+
+<script>
+    const specialTasks = [
+        { type: "spell", word: "C_AT", missing: "O", options: ["O", "A", "U", "E"], full: "COAT", heb: "מעיל" },
+        { type: "spell", word: "E_ES", missing: "Y", options: ["Y", "I", "A", "E"], full: "EYES", heb: "עיניים" },
+        { type: "spell", word: "S_NNY", missing: "U", options: ["U", "A", "O", "I"], full: "SUNNY", heb: "שמשי" },
+        { type: "spell", word: "CL_UD", missing: "O", options: ["O", "U", "A", "I"], full: "CLOUD", heb: "ענן" },
+        { type: "spell", word: "M_UTH", missing: "O", options: ["O", "A", "U", "E"], full: "MOUTH", heb: "פה" },
+        { type: "translate", word: "FUNNY", correct: "מצחיק", options: ["מצחיק", "לצחוק"], full: "FUNNY" },
+        { type: "translate", word: "NEAR", correct: "קרוב ל...", options: ["קרוב ל...", "מתנה"], full: "NEAR" },
+        { type: "translate", word: "STORE", correct: "חנות", options: ["חנות", "סיפור"], full: "STORE" },
+        { type: "spell", word: "B_OTS", missing: "O", options: ["O", "A", "U", "E"], full: "BOOTS", heb: "מגפיים" },
+        { type: "translate", word: "GOOD FOR YOU", correct: "כל הכבוד / טוב לך", options: ["כל הכבוד / טוב לך", "בוקר טוב"], full: "GOOD FOR YOU" }
+    ];
+
+    let currentIdx = 0;
+    let history = [];
+
+    function shuffle(array) {
+        return array.sort(() => Math.random() - 0.5);
+    }
+
+    function loadQuestion() {
+        if (currentIdx >= specialTasks.length) {
+            document.getElementById('game-content').innerHTML = "<h2>סיימנו בהצלחה! 🥳</h2><p>כל התשובות תוקנו. הילדה אלופה!</p>";
+            document.getElementById('log-btn').style.display = "block";
+            return;
+        }
+
+        const task = specialTasks[currentIdx];
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        document.getElementById('feedback').innerText = '';
+        document.getElementById('q-num').innerText = currentIdx + 1;
+
+        if (task.type === "spell") {
+            document.getElementById('instruction').innerText = "איזו אות חסרה במילה: " + task.heb + "?";
+            document.getElementById('word-display').innerText = task.word;
+            
+            let shuffledLetters = shuffle([...task.options]);
+            shuffledLetters.forEach(letter => {
+                const btn = document.createElement('button');
+                btn.innerText = letter;
+                btn.onclick = (e) => check(letter === task.missing, task.full, e.target);
+                container.appendChild(btn);
+            });
+        } else {
+            document.getElementById('instruction').innerText = "מה הפירוש הנכון?";
+            document.getElementById('word-display').innerText = task.word;
+            
+            let shuffledTrans = shuffle([...task.options]);
+            shuffledTrans.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.innerText = opt;
+                btn.onclick = (e) => check(opt === task.correct, task.word, e.target);
+                container.appendChild(btn);
+            });
+        }
+    }
+
+    function check(isCorrect, wordName, btn) {
+        if (isCorrect) {
+            btn.classList.add('correct-anim');
+            document.getElementById('feedback').innerText = "נכון מאוד! ✨";
+            document.getElementById('feedback').style.color = "green";
+            history.push({ word: wordName, success: true });
+            currentIdx++;
+            setTimeout(loadQuestion, 800);
+        } else {
+            btn.style.backgroundColor = "#e74c3c";
+            btn.style.color = "white";
+            document.getElementById('feedback').innerText = "נסו שוב...";
+            document.getElementById('feedback').style.color = "red";
+            history.push({ word: wordName, success: false });
+        }
+    }
+
+    function exportResults() {
+        const log = btoa(unescape(encodeURIComponent(JSON.stringify({date: new Date().toLocaleDateString(), results: history}))));
+        const out = document.getElementById('log-out');
+        out.value = log;
+        out.style.display = "block";
+        out.select();
+    }
+
+    loadQuestion();
+</script>
+</body>
+</html>
