@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>מבחן האמת או שקר של Unit 2</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #eef2f3; text-align: center; padding: 20px; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .statement { font-size: 24px; font-weight: bold; margin: 20px 0; min-height: 60px; color: #2c3e50; }
+        .options { display: flex; justify-content: center; gap: 20px; }
+        button { padding: 15px 40px; font-size: 20px; cursor: pointer; border-radius: 50px; border: none; font-weight: bold; transition: 0.3s; }
+        .btn-true { background-color: #2ecc71; color: white; }
+        .btn-false { background-color: #e74c3c; color: white; }
+        button:hover { opacity: 0.8; transform: scale(1.05); }
+        #feedback { margin-top: 20px; font-size: 20px; height: 30px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>אמת או שקר? (True / False)</h1>
+    <p>האם המשפט הגיוני ונכון?</p>
+    <div id="statement" class="statement">Loading...</div>
+    <div class="options">
+        <button class="btn-true" onclick="check(true)">TRUE (אמת)</button>
+        <button class="btn-false" onclick="check(false)">FALSE (שקר)</button>
+    </div>
+    <div id="feedback"></div>
+</div>
+
+<script>
+    const questions = [
+        { text: "Ice cream is COLD.", ans: true },
+        { text: "There are CLOUDS in the sky.", ans: true },
+        { text: "I wear boots on my hands.", ans: false },
+        { text: "I eat with my mouth.", ans: true },
+        { text: "In the winter (חורף) it is warm.", ans: false },
+        { text: "A cloud is in the sky.", ans: true },
+        { text: "I wear a dress to sleep.", ans: false },
+        { text: "The sun is cold.", ans: false }
+    ];
+
+    let current = 0;
+    function load() {
+        if(current >= questions.length) {
+            document.querySelector('.container').innerHTML = "<h2>כל הכבוד! סיימת את האימון!</h2><p>עכשיו את מוכנה למבחן!</p>";
+            return;
+        }
+        document.getElementById('statement').innerText = questions[current].text;
+        document.getElementById('feedback').innerText = "";
+    }
+
+    function check(userAns) {
+        if(userAns === questions[current].ans) {
+            document.getElementById('feedback').innerText = "כל הכבוד! נכון מאוד! ✨";
+            document.getElementById('feedback').style.color = "green";
+            current++;
+            setTimeout(load, 1000);
+        } else {
+            document.getElementById('feedback').innerText = "חשבי שוב... האם זה הגיוני?";
+            document.getElementById('feedback').style.color = "red";
+        }
+    }
+    load();
+</script>
+</body>
+</html>
